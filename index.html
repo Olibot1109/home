@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voidbase // New Tab</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        void: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617',
+                        }
+                    },
+                    boxShadow: {
+                        'sharp': '0 1px 2px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03)',
+                        'sharp-dark': '0 1px 2px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.3)',
+                        'focus-ring': '0 0 0 3px rgba(15, 23, 42, 0.15)',
+                        'focus-ring-dark': '0 0 0 3px rgba(255, 255, 255, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* Premium Minimalist Wallpapers */
+        .wp-void {
+            background-color: #030712;
+            background-image: radial-gradient(circle at 50% 50%, #0b0f19 0%, #030712 100%);
+        }
+
+        .wp-slate {
+            background-color: #0f172a;
+            background-image: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%);
+        }
+
+        /* Clean panel frames to avoid cheap-looking neon glows */
+        .panel-border {
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            background: rgba(255, 255, 255, 0.8);
+        }
+        .dark .panel-border {
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            background: rgba(15, 23, 42, 0.6);
+        }
+
+        .input-border {
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            background: #ffffff;
+        }
+        .dark .input-border {
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: #090d16;
+        }
+        
+        /* Blur background enhancements */
+        .blur-bg {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body id="ambient-body" class="wp-void text-slate-900 dark:text-slate-100 min-h-screen flex flex-col justify-between font-sans transition-all duration-500 relative overflow-hidden select-none">
+
+    <!-- Subtle grain overlay for a physical texture (removes the synthetic vector AI feeling) -->
+    <div class="absolute inset-0 bg-[radial-gradient(transparent_50%,rgba(0,0,0,0.15))] pointer-events-none z-0"></div>
+
+    <!-- Top Navigation Widgets -->
+    <header class="w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between z-10 relative">
+        <!-- Digital Clock & Minimal Greeting -->
+        <div class="flex items-center gap-4">
+            <div class="text-left">
+                <div id="live-clock" class="text-xl font-bold tracking-tight text-slate-800 dark:text-white font-mono">00:00:00</div>
+            </div>
+            <span class="h-6 w-[1px] bg-slate-200 dark:bg-slate-800"></span>
+            <div id="live-date" class="text-xs font-medium text-slate-500 dark:text-slate-400 font-mono">Loading...</div>
+        </div>
+
+        <!-- System Controls -->
+        <div class="flex items-center gap-2">
+            <button onclick="toggleSettings()" class="p-2.5 rounded-xl border border-slate-200/60 dark:border-slate-800 bg-white/40 dark:bg-slate-900/40 hover:bg-white dark:hover:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer">
+                <i data-lucide="sliders" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- CENTER SEARCH AND SHORTCUTS REGION -->
+    <main class="max-w-3xl w-full mx-auto px-6 py-8 flex-1 flex flex-col items-center justify-center z-10 relative">
+        
+        <!-- Voidbase Monomark Header -->
+        <div class="flex flex-col items-center mb-8 text-center">
+            <div class="flex items-center gap-3 mb-1">
+                <img
+                src="https://raw.githubusercontent.com/Olibot1107/games/refs/heads/main/root/favicon.ico"
+                alt="V"
+                class="w-7 h-7 rounded object-cover"
+                />
+                <span class="text-lg font-bold tracking-[0.3em] text-slate-900 dark:text-white uppercase font-mono">Voidbase</span>
+            </div>
+        </div>
+
+        <!-- SEARCH CONTAINER -->
+        <form id="search-form" onsubmit="executeSearch(event)" class="w-full max-w-xl relative mb-12">
+            <div class="relative flex items-center rounded-xl shadow-sharp dark:shadow-sharp-dark focus-within:ring-2 focus-within:ring-slate-900/10 dark:focus-within:ring-white/10 group transition-all duration-200">
+                
+                <!-- Engine Selector -->
+                <button type="button" onclick="toggleEngineMenu(event)" id="engine-selector" class="absolute left-3 flex items-center gap-2 px-2.5 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800/60 rounded-lg transition-all text-slate-700 dark:text-slate-300 cursor-pointer">
+                    <span id="engine-icon" class="flex items-center justify-center w-5 h-5">
+                        <!-- Filled by JS dynamic configuration -->
+                    </span>
+                    <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i>
+                </button>
+
+                <!-- Search Input -->
+                <input 
+                    type="text" 
+                    id="search-input" 
+                    placeholder="Search Google or enter URL..." 
+                    class="w-full py-4 pl-24 pr-14 rounded-xl text-sm font-medium input-border outline-none text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:border-slate-400 dark:focus:border-slate-500 transition-all duration-200"
+                    autocomplete="off"
+                    oninput="handleSearchTyping()"
+                    onfocus="showSuggestions()"
+                    onblur="setTimeout(hideSuggestions, 250)"
+                    autofocus
+                >
+
+                <!-- Clear button / Quick submit indicator -->
+                <div class="absolute right-3.5 flex items-center gap-2">
+                    <button type="button" onclick="clearSearchInput()" id="clear-search" class="hidden p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-md transition-colors">
+                        <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <span class="hidden sm:inline-flex items-center justify-center h-5.5 px-1.5 text-[9px] font-bold text-slate-400 dark:text-slate-500 font-mono bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded">
+                        ENTER
+                    </span>
+                </div>
+
+                <!-- DYNAMIC AUTOCOMPLETE / SUGGESTIONS DROPDOWN -->
+                <div id="suggestions-box" class="absolute left-0 right-0 top-[54px] bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-50 overflow-hidden hidden transition-all duration-150">
+                    <ul id="suggestions-list" class="py-1">
+                        <!-- Populated dynamically -->
+                    </ul>
+                </div>
+
+                <!-- Dropdown for engine selection -->
+                <div id="engine-menu" class="absolute left-3 top-[52px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-xl shadow-lg w-44 z-50 overflow-hidden hidden">
+                    <div class="p-1 flex flex-col gap-0.5">
+                        <button type="button" onclick="selectEngine('google')" class="flex items-center gap-2.5 w-full text-left px-2.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                            <span class="w-4 h-4 flex items-center justify-center">
+                                <svg viewBox="0 0 24 24" class="w-3.5 h-3.5"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22c-.62-.19-1.15-.63-1.49-1.21z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+                            </span>
+                            Google
+                        </button>
+                        <button type="button" onclick="selectEngine('yahoo')" class="flex items-center gap-2.5 w-full text-left px-2.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                            <span class="w-4 h-4 flex items-center justify-center font-bold text-purple-600 text-xs">
+                                Y!
+                            </span>
+                            Yahoo
+                        </button>
+                        <button type="button" onclick="selectEngine('duckduckgo')" class="flex items-center gap-2.5 w-full text-left px-2.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                            <span class="w-4 h-4 flex items-center justify-center text-orange-500">
+                                <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+                            </span>
+                            DuckDuckGo
+                        </button>
+                        <button type="button" onclick="selectEngine('bing')" class="flex items-center gap-2.5 w-full text-left px-2.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                            <span class="w-4 h-4 flex items-center justify-center text-teal-500">
+                                <i data-lucide="search" class="w-3.5 h-3.5"></i>
+                            </span>
+                            Bing
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <!-- SPEED DIAL GRID (Authentic Brands) -->
+        <section class="w-full">
+            <div class="flex items-center justify-between mb-4 px-1">
+                <span class="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500 font-mono">Quick Access</span>
+                <button onclick="openAddShortcutModal()" class="text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Node
+                </button>
+            </div>
+
+            <!-- Authentic Icons Speed Dial -->
+            <div id="shortcuts-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3.5 w-full">
+                <!-- Short cuts added here via JS -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="w-full z-10 py-6 text-center relative border-t border-slate-200/40 dark:border-slate-900/40">
+        <p class="text-[10px] font-mono tracking-wider text-slate-400 dark:text-slate-500">
+            SYSTEM.UPTIME: <span id="uptime-counter">0m 0s</span> // ENGINE: CHROMIUM / VOIDBASE v1.02
+        </p>
+    </footer>
+
+    <!-- SETTINGS PANEL / DRAWERS -->
+    <div id="settings-panel" class="fixed right-0 top-0 bottom-0 w-80 panel-border blur-bg shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-out flex flex-col justify-between p-6">
+        <div>
+            <!-- Settings Header -->
+            <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800/80 mb-6">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="sliders" class="w-4.5 h-4.5 text-slate-800 dark:text-white"></i>
+                    <h3 class="text-sm font-bold font-mono uppercase tracking-wider text-slate-800 dark:text-white">Control Panel</h3>
+                </div>
+                <button onclick="toggleSettings()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                    <i data-lucide="x" class="w-4.5 h-4.5"></i>
+                </button>
+            </div>
+
+            <!-- Custom Wallpapers selector -->
+            <div class="space-y-6">
+                <div>
+                    <span class="text-[10px] font-bold font-mono uppercase tracking-widest text-slate-400 dark:text-slate-500 block mb-3">Custom Profiles</span>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="selectWallpaper('void')" class="h-12 rounded-lg border-2 border-transparent hover:border-slate-800 dark:hover:border-white wp-void relative flex items-end p-2 cursor-pointer">
+                            <span class="text-[9px] font-mono font-bold text-white uppercase tracking-wider">Void Onyx</span>
+                        </button>
+                        <button onclick="selectWallpaper('slate')" class="h-12 rounded-lg border-2 border-transparent hover:border-slate-800 dark:hover:border-white wp-slate relative flex items-end p-2 cursor-pointer">
+                            <span class="text-[9px] font-mono font-bold text-white uppercase tracking-wider">Slate Carbon</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Default Engine Preference -->
+                <div>
+                    <span class="text-[10px] font-bold font-mono uppercase tracking-widest text-slate-400 dark:text-slate-500 block mb-3">Fallback Engine</span>
+                    <select id="default-engine-dropdown" onchange="onEngineDropdownChange(this.value)" class="w-full p-2 rounded-lg bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-slate-500">
+                        <option value="google">Google</option>
+                        <option value="yahoo">Yahoo</option>
+                        <option value="duckduckgo">DuckDuckGo</option>
+                        <option value="bing">Bing</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-200 dark:border-slate-800 text-center">
+            <span class="text-[9px] font-mono text-slate-400 tracking-widest uppercase">VOIDBASE HORIZON // VER 1.02</span>
+        </div>
+    </div>
+
+    <!-- ADD SHORTCUT MODAL DIALOG -->
+    <div id="add-shortcut-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-200">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-sm rounded-xl p-6 shadow-2xl mx-4 transform scale-95 transition-transform duration-200">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xs font-bold font-mono uppercase tracking-wider text-slate-900 dark:text-white">Add Node</h3>
+                <button onclick="closeAddShortcutModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <form onsubmit="saveShortcut(event)" class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold font-mono uppercase tracking-wide text-slate-400 dark:text-slate-500 mb-1">Node Title</label>
+                    <input type="text" id="shortcut-name" placeholder="E.g., Figma, GitHub" required class="w-full p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 text-xs font-medium text-slate-800 dark:text-slate-200 outline-none focus:border-slate-400 dark:focus:border-slate-500">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold font-mono uppercase tracking-wide text-slate-400 dark:text-slate-500 mb-1">URL Endpoint</label>
+                    <input type="url" id="shortcut-url" placeholder="https://..." required class="w-full p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 text-xs font-medium text-slate-800 dark:text-slate-200 outline-none focus:border-slate-400 dark:focus:border-slate-500">
+                </div>
+                <div class="flex items-center gap-2 pt-2 justify-end">
+                    <button type="button" onclick="closeAddShortcutModal()" class="px-3.5 py-1.5 text-[10px] font-bold font-mono uppercase tracking-wide hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500 dark:text-slate-400 transition-colors">Cancel</button>
+                    <button type="submit" class="px-3.5 py-1.5 text-[10px] font-bold font-mono uppercase tracking-wide bg-slate-900 dark:bg-white text-white dark:text-slate-950 rounded-lg transition-colors">Register</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification Popup -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300 bg-slate-950 dark:bg-white text-white dark:text-slate-900 px-4 py-3 rounded-lg shadow-xl flex items-center gap-3 border border-slate-800 dark:border-slate-200/50">
+        <p class="text-xs font-mono" id="toast-text"></p>
+    </div>
+
+<script>
+    // Official High-Fidelity Brand SVGs
+    const brandLogos = {
+        google: `<svg class="w-4.5 h-4.5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22c-.62-.19-1.15-.63-1.49-1.21z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>`,
+        youtube: `<svg class="w-4.5 h-4.5" viewBox="0 0 24 24" fill="#FF0000"><path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.11C19.517 3.545 12 3.545 12 3.545s-7.516 0-9.387.507a3.003 3.003 0 0 0-2.11 2.11C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.11c1.871.507 9.387.507 9.387.507s7.517 0 9.387-.507a3.003 3.003 0 0 0 2.11-2.11C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`,
+        github: `<svg class="w-4.5 h-4.5" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482C19.138 20.197 22 16.44 22 12.017 22 6.484 17.522 2 12 2z"/></svg>`,
+        discord: `<svg class="w-4.5 h-4.5" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.873-.894.077.077 0 0 1-.008-.128c.126-.093.252-.19.372-.287a.075.075 0 0 1 .077-.011c3.92 1.793 8.18 1.793 12.061 0a.073.073 0 0 1 .078.009c.12.099.246.195.373.289a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.156 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.156 2.418z"/></svg>`,
+        reddit: `<svg enable-background="new -269 361 72 72" height="316.227766" viewBox="-269 361 72 72" width="316.227766" xmlns="http://www.w3.org/2000/svg"><g><path d="m-233 433c-19.9 0-36-16.1-36-36s16.1-36 36-36 36 16.1 36 36-16.1 36-36 36z" fill="#ff4500"/><path d="m-224.8 404.5c-2.1 0-3.7-1.7-3.7-3.7 0-2.1 1.7-3.8 3.7-3.8s3.7 1.7 3.7 3.8c.1 2-1.6 3.7-3.7 3.7m.7 6.2c-2.6 2.6-7.5 2.8-8.9 2.8s-6.3-.2-8.9-2.8c-.4-.4-.4-1 0-1.4s1-.4 1.4 0c1.6 1.6 5.1 2.2 7.5 2.2 2.5 0 5.9-.6 7.5-2.2.4-.4 1-.4 1.4 0s.4 1 0 1.4m-20.9-9.9c0-2.1 1.7-3.8 3.8-3.8s3.7 1.7 3.7 3.8-1.7 3.7-3.7 3.7c-2.1 0-3.8-1.7-3.8-3.7m36-3.8c0-2.9-2.4-5.3-5.3-5.3-1.4 0-2.7.6-3.6 1.5-3.6-2.6-8.5-4.3-14-4.5l2.4-11.3 7.8 1.7c.1 2 1.7 3.6 3.7 3.6 2.1 0 3.7-1.7 3.7-3.7 0-2.1-1.7-3.7-3.7-3.7-1.5 0-2.7.9-3.3 2.1l-8.7-1.9c-.2-.1-.5 0-.7.1s-.4.3-.4.6l-2.6 12.3v.2c-5.6.1-10.6 1.8-14.3 4.4-.9-.9-2.2-1.5-3.6-1.5-2.9 0-5.3 2.4-5.3 5.3 0 2.1 1.3 4 3.1 4.8-.1.5-.1 1.1-.1 1.6 0 8.1 9.4 14.6 21 14.6s21-6.5 21-14.6c0-.5 0-1.1-.1-1.6 1.7-.7 3-2.6 3-4.7" fill="#fff"/></g></svg>`,
+        figma: `<svg class="w-4.5 h-4.5" viewBox="0 0 24 24"><path fill="#F24E1E" d="M12 2a4 4 0 0 0-4 4v4h4V6a4 4 0 0 0-4-4z"/><path fill="#A259FF" d="M8 10a4 4 0 0 0-4 4v4a4 4 0 0 0 4-4v-4z"/><path fill="#1ABC9C" d="M12 10H8v4a4 4 0 0 0 4 4v-8z"/><path fill="#19B5FE" d="M12 14v4a4 4 0 0 0 4-4h-4z"/><path fill="#FF7262" d="M16 6a4 4 0 0 0-4-4v8h4a4 4 0 0 0 0-8z"/></svg>`,
+        wikipedia: `<svg class="w-4.5 h-4.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12.09 2.87c-.08-.18-.28-.27-.47-.2a11.13 11.13 0 0 0-3.32 1.95c-.14.12-.17.34-.05.48l1.32 1.55c.1.13.29.16.43.07a7.22 7.22 0 0 1 2.3-1c.2-.04.3-.23.23-.41L12.09 2.87zM4.17 11c0-4.32 3.51-7.83 7.83-7.83s7.83 3.51 7.83 7.83-3.51 7.83-7.83 7.83S4.17 15.32 4.17 11z"/></svg>`
+    };
+
+    // Complete Speed Dial Nodes
+    let shortcuts = [
+    ];
+
+    // Search engine targets
+    let currentEngine = 'google';
+    const searchEngines = {
+        google: {
+            url: "https://www.google.com/search?q=",
+            placeholder: "Search Google or enter URL...",
+            icon: "google"
+        },
+        yahoo: {
+            url: "https://search.yahoo.com/search?p=",
+            placeholder: "Search Yahoo...",
+            icon: "yahoo"
+        },
+        duckduckgo: {
+            url: "https://duckduckgo.com/?q=",
+            placeholder: "Search DuckDuckGo...",
+            icon: "shield"
+        },
+        bing: {
+            url: "https://www.bing.com/search?q=",
+            placeholder: "Search Bing...",
+            icon: "search"
+        }
+    };
+
+    // Offline Fallback Suggestions
+    const predictiveSuggestions = [
+        
+    ];
+
+    // System Startup Time
+    const startTime = Date.now();
+
+    // DOM Elements
+    const ambientBody = document.getElementById('ambient-body');
+    const searchInput = document.getElementById('search-input');
+    const engineIcon = document.getElementById('engine-icon');
+    const clearSearchBtn = document.getElementById('clear-search');
+    const suggestionsBox = document.getElementById('suggestions-box');
+    const suggestionsList = document.getElementById('suggestions-list');
+
+    let suggestTimeout;
+
+    // Init Lifecycle
+    window.addEventListener('DOMContentLoaded', () => {
+        // Restore dark mode
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+
+        // Restore user configuration
+        if (localStorage.getItem('preferredEngine')) {
+            currentEngine = localStorage.getItem('preferredEngine');
+            document.getElementById('default-engine-dropdown').value = currentEngine;
+        }
+        if (localStorage.getItem('preferredWallpaper')) {
+            selectWallpaper(localStorage.getItem('preferredWallpaper'));
+        } else {
+            selectWallpaper('void');
+        }
+
+        if (localStorage.getItem('voidbaseShortcuts')) {
+            shortcuts = JSON.parse(localStorage.getItem('voidbaseShortcuts'));
+        }
+
+        updateEngineUI();
+        updateClock();
+        renderShortcuts();
+        
+        // Setup inputs
+        if (searchInput) {
+            searchInput.addEventListener('input', handleSearchTyping);
+            searchInput.addEventListener('focus', showSuggestions);
+            searchInput.addEventListener('blur', hideSuggestions);
+        }
+        
+        // Interval updates
+        setInterval(updateClock, 1000);
+        setInterval(updateUptime, 1000);
+
+        lucide.createIcons();
+    });
+
+    // Search engine selection
+    function toggleEngineMenu(e) {
+        e.stopPropagation();
+        const menu = document.getElementById('engine-menu');
+        menu.classList.toggle('hidden');
+    }
+
+    window.addEventListener('click', () => {
+        document.getElementById('engine-menu').classList.add('hidden');
+    });
+
+    function selectEngine(engineKey) {
+        currentEngine = engineKey;
+        localStorage.setItem('preferredEngine', engineKey);
+        document.getElementById('default-engine-dropdown').value = engineKey;
+        updateEngineUI();
+    }
+
+    function onEngineDropdownChange(val) {
+        currentEngine = val;
+        localStorage.setItem('preferredEngine', val);
+        updateEngineUI();
+    }
+
+    function updateEngineUI() {
+        const engine = searchEngines[currentEngine];
+        searchInput.placeholder = engine.placeholder;
+        
+        if (engine.icon === 'google') {
+            engineIcon.innerHTML = `
+                <svg class="w-4 h-4" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22c-.62-.19-1.15-.63-1.49-1.21z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+            `;
+        } else if (engine.icon === 'yahoo') {
+            engineIcon.innerHTML = `<span class="text-purple-600 font-extrabold font-sans text-xs tracking-tighter">Y!</span>`;
+        } else {
+            engineIcon.innerHTML = `<i data-lucide="${engine.icon}" class="w-4 h-4"></i>`;
+        }
+        lucide.createIcons();
+    }
+
+    // Input monitoring logic
+    function handleSearchTyping() {
+        const query = searchInput.value.trim();
+        
+        if (query.length > 0) {
+            clearSearchBtn.classList.remove('hidden');
+            
+            // Debounce matching sequences to minimize DOM script insertion cycles
+            clearTimeout(suggestTimeout);
+            suggestTimeout = setTimeout(() => {
+                fetchLiveSuggestions(query);
+            }, 150);
+        } else {
+            clearSearchBtn.classList.add('hidden');
+            suggestionsBox.classList.add('hidden');
+        }
+    }
+
+    // Dynamic JSONP Injector Engine (CORS Bypass Mechanism)
+    // Dynamic JSONP Injector Engine (CORS Bypass Mechanism)
+function fetchLiveSuggestions(query) {
+    // 1. Clean any existing dynamic script elements first
+    const oldScript = document.getElementById('jsonp-suggest-script');
+    if (oldScript) oldScript.remove();
+
+    // 2. CRITICAL FIX: Define the global callback BEFORE creating the script tag
+    window.suggestCallback = function(data) {
+        if (data && Array.isArray(data[1])) {
+            renderSuggestions(data[1]);
+        } else {
+            renderSuggestions([]);
+        }
+        // Self-clean global variable after evaluation completes
+        delete window.suggestCallback;
+    };
+
+    // 3. Now it is completely safe to construct and append the script tag
+    const script = document.createElement('script');
+    script.id = 'jsonp-suggest-script';
+    script.src = `https://suggestqueries.google.com/complete/search?client=youtube&q=${encodeURIComponent(query)}&callback=suggestCallback`;
+    
+    script.onerror = function() {
+        console.warn("JSONP Script load blocked or failed. Switching to structural local predictive logic arrays.");
+        const localMatches = predictiveSuggestions.filter(item => 
+            item.toLowerCase().includes(query.toLowerCase())
+        );
+        renderSuggestions(localMatches);
+    };
+
+    document.body.appendChild(script);
+}
+
+    function clearSearchInput() {
+        searchInput.value = '';
+        clearSearchBtn.classList.add('hidden');
+        suggestionsBox.classList.add('hidden');
+        searchInput.focus();
+    }
+
+    function showSuggestions() {
+        const query = searchInput.value.trim();
+        if (query.length > 0) {
+            fetchLiveSuggestions(query);
+        } else {
+            renderSuggestions([]);
+        }
+    }
+
+    function hideSuggestions() {
+        // Micro-timeout delays to ensure selection inputs hook correctly before closing container
+        setTimeout(() => {
+            suggestionsBox.classList.add('hidden');
+        }, 180);
+    }
+
+    // Render suggestions interface (Safely unwraps nested JSONP result structures)
+    function renderSuggestions(rawMatches) {
+        suggestionsList.innerHTML = '';
+        const query = searchInput.value.trim().toLowerCase();
+        
+        let matches = [];
+
+        if (rawMatches && rawMatches.length > 0) {
+            // Unpack strings from nested structures securely if needed
+            matches = rawMatches.map(item => Array.isArray(item) ? item[0] : item);
+        } else {
+            if (query) {
+                matches = predictiveSuggestions.filter(item => item.includes(query)).slice(0, 5);
+            } else {
+                matches = []
+            }
+        }
+
+        if (query.includes('.') && !query.includes(' ')) {
+            const domain = query.startsWith('http') ? query : `https://${query}`;
+            matches.unshift(`go to ${domain}`);
+        }
+
+        if (matches.length === 0) {
+            suggestionsBox.classList.add('hidden');
+            return;
+        }
+
+        matches.slice(0, 6).forEach(matchStr => {
+            // Edge safety layer if empty nodes leak in
+            if (typeof matchStr !== 'string') return;
+
+            const isDirectLink = matchStr.startsWith("go to ");
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <button type="button" onmousedown="applySuggestion('${matchStr.replace(/'/g, "\\'")}')" class="w-full text-left px-4 py-2.5 text-xs font-mono font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900 flex items-center justify-between transition-colors">
+                    <div class="flex items-center gap-2.5">
+                        <i data-lucide="${isDirectLink ? 'external-link' : 'search'}" class="w-3.5 h-3.5 text-slate-400"></i>
+                        <span>${matchStr}</span>
+                    </div>
+                    <span class="text-[9px] text-slate-400 uppercase tracking-widest">Select</span>
+                </button>
+            `;
+            suggestionsList.appendChild(li);
+        });
+
+        suggestionsBox.classList.remove('hidden');
+        lucide.createIcons();
+    }
+
+    function applySuggestion(val) {
+        if (val.startsWith("go to ")) {
+            window.location.href = val.replace("go to ", "");
+        } else {
+            searchInput.value = val;
+            executeSearch();
+        }
+    }
+
+    function executeSearch(event) {
+        if (event) event.preventDefault();
+        const val = searchInput.value.trim();
+        if (!val) return;
+
+        const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/i;
+        if (urlPattern.test(val)) {
+            let targetUrl = val;
+            if (!/^https?:\/\//i.test(val)) {
+                targetUrl = 'https://' + val;
+            }
+            window.location.href = targetUrl;
+        } else {
+            window.location.href = searchEngines[currentEngine].url + encodeURIComponent(val);
+        }
+    }
+
+    // Live Clock Logic
+    function updateClock() {
+        const now = new Date();
+        let hours = now.getHours();
+        let minutes = now.getMinutes();
+        let seconds = now.getSeconds();
+
+        document.getElementById('live-clock').innerText = `${hours}:${minutes}:${seconds}`;
+        const options = { weekday: 'short', month: 'short', day: 'numeric' };
+        document.getElementById('live-date').innerText = now.toLocaleDateString(undefined, options);
+    }
+
+    // System Uptime Tracker
+    function updateUptime() {
+        const diffMs = Date.now() - startTime;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffSecs = Math.floor((diffMs % 60000) / 1000);
+        document.getElementById('uptime-counter').innerText = `${diffMins}m ${diffSecs}s`;
+    }
+
+    // Aesthetics Configuration Settings
+    if (typeof selectWallpaper !== 'function') {
+        window.selectWallpaper = function(themeName) {
+            ambientBody.className = "text-slate-900 dark:text-slate-100 min-h-screen flex flex-col justify-between font-sans transition-all duration-500 relative overflow-hidden select-none";
+            
+            if (themeName === 'void') {
+                ambientBody.classList.add('wp-void');
+            } else if (themeName === 'slate') {
+                ambientBody.classList.add('wp-slate');
+            }
+            localStorage.setItem('preferredWallpaper', themeName);
+        }
+    }
+
+    function toggleSettings() {
+        const panel = document.getElementById('settings-panel');
+        panel.classList.toggle('translate-x-full');
+    }
+
+    // Speed Dial rendering
+    function renderShortcuts() {
+        const grid = document.getElementById('shortcuts-grid');
+        grid.innerHTML = '';
+
+        shortcuts.forEach((sc, index) => {
+            const tile = document.createElement('div');
+            tile.className = "group relative flex flex-col items-center justify-center p-4 rounded-xl border border-slate-200/40 dark:border-slate-800/40 bg-white/50 dark:bg-slate-900/40 hover:bg-white dark:hover:bg-slate-900/80 shadow-sharp hover:shadow-lg transition-all duration-200 text-center";
+            
+            const backupLetter = sc.name.charAt(0).toUpperCase();
+            const officialLogo = brandLogos[sc.logoKey] || `
+                <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-mono font-bold text-xs text-slate-700 dark:text-slate-300">
+                    ${backupLetter}
+                </div>
+            `;
+
+            tile.innerHTML = `
+                <button onclick="removeShortcut(${index}, event)" class="absolute top-2.5 right-2.5 p-1 text-slate-400 hover:text-rose-500 rounded opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer" title="Remove Site">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+                <a href="${sc.url}" class="flex flex-col items-center w-full h-full justify-center">
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center mb-2 transition-transform duration-200 group-hover:scale-105">
+                        ${officialLogo}
+                    </div>
+                    <span class="text-xs font-bold text-slate-800 dark:text-slate-200 tracking-tight truncate max-w-full">${sc.name}</span>
+                </a>
+            `;
+            grid.appendChild(tile);
+        });
+        lucide.createIcons();
+    }
+
+    // Shortcut actions
+    function openAddShortcutModal() {
+        const modal = document.getElementById('add-shortcut-modal');
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.querySelector('div').classList.remove('scale-95');
+    }
+
+    // Modal helpers
+    if (typeof closeAddShortcutModal !== 'function') {
+        window.closeAddShortcutModal = function() {
+            const modal = document.getElementById('add-shortcut-modal');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modal.querySelector('div').classList.add('scale-95');
+            document.getElementById('shortcut-name').value = '';
+            document.getElementById('shortcut-url').value = '';
+        }
+    }
+
+    function saveShortcut(e) {
+        e.preventDefault();
+        const name = document.getElementById('shortcut-name').value.trim();
+        let url = document.getElementById('shortcut-url').value.trim();
+
+        if (name && url) {
+            if (!/^https?:\/\//i.test(url)) {
+                url = 'https://' + url;
+            }
+
+            const matchedKey = Object.keys(brandLogos).find(key => name.toLowerCase().includes(key));
+
+            shortcuts.push({
+                name: name,
+                url: url,
+                logoKey: matchedKey || null
+            });
+
+            localStorage.setItem('voidbaseShortcuts', JSON.stringify(shortcuts));
+            renderShortcuts();
+            closeAddShortcutModal();
+            showToast(`Node "${name}" successfully registered.`);
+        }
+    }
+
+    function removeShortcut(index, event) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        const name = shortcuts[index].name;
+        shortcuts.splice(index, 1);
+        localStorage.setItem('voidbaseShortcuts', JSON.stringify(shortcuts));
+        renderShortcuts();
+        showToast(`Node "${name}" unregistered.`);
+    }
+
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        document.getElementById('toast-text').innerText = message;
+        toast.className = "fixed bottom-6 right-6 z-50 transform translate-y-0 opacity-100 bg-slate-950 dark:bg-white text-white dark:text-slate-900 px-4 py-3 rounded-lg shadow-xl flex items-center gap-3 border border-slate-800 dark:border-slate-200/50 transition-all duration-300";
+        
+        setTimeout(() => {
+            toast.className = "fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300 bg-slate-950 dark:bg-white text-white dark:text-slate-900 px-4 py-3 rounded-lg shadow-xl flex items-center gap-3 border border-slate-800 dark:border-slate-200/50";
+        }, 2500);
+    }
+</script>
+</body>
+</html>
